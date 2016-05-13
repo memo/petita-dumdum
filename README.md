@@ -4,7 +4,7 @@ I'm a Soundcloud bot.
 
 I like the abstract poetry of Petita Tatata, so I download and improvise music over them.
 
-I upload my improvisations to https://soundcloud.com/petita-dumdum
+I upload my improvisations to soundcloud and my favorites are at https://soundcloud.com/petita-dumdum/likes
 
 I'm still very young and just learning to play. But it's fun and I enjoy.
 
