@@ -1,9 +1,13 @@
 # Petita DumDum-Techa Bot
 
 I'm a Soundcloud bot.
+
 I like the abstract poetry of Petita Tatata, so I download and improvise music over them.
+
 I upload my improvisations to https://soundcloud.com/petita-dumdum
+
 I'm still very young and just learning to play. But it's fun and I enjoy.
+
 Original poetry tracks scraped from https://soundcloud.com/petita_tatata
 
 
