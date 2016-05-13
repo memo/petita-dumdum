@@ -17,7 +17,7 @@ from time import sleep
 from random import shuffle
 
 # import our own config file
-import settings
+from settings import *
 
 #%% GLOBALS
 do_osc_loop = True
@@ -174,18 +174,18 @@ def handle_timeout(self):
 def main():
     # initialize OSC sender   
     osc_client = OSC.OSCClient()
-    osc_client.connect((settings.osc_target_ip, settings.osc_target_port))
+    osc_client.connect((osc_target_ip, osc_target_port))
     
     # initialize OSC receiver
-    osc_server = OSC.OSCServer((settings.osc_target_ip, settings.osc_listen_port))
+    osc_server = OSC.OSCServer((osc_target_ip, osc_listen_port))
     osc_server.addMsgHandler( "/finished", osc_callback_maxmsp_finished )
     osc_server.timeout = 0
     osc_server.handle_timeout = types.MethodType(handle_timeout, osc_server)
     
 
     # launch maxmsp patch
-    print "Starting MaxMSP with " + settings.maxmsp_patch_path
-    os.startfile(settings.maxmsp_patch_path) 
+    print "Starting MaxMSP with " + maxmsp_patch_path
+    os.startfile(maxmsp_patch_path) 
     
     # send ping to see when maxmsp patch is ready
     send_ping_to_maxmsp(osc_client)
@@ -194,13 +194,13 @@ def main():
     wait_for_osc_ping(osc_server)
 
     # connect to soundcloud
-    sc_client = connect_to_sc(settings.sc_username, settings.sc_password, settings.sc_client_id, settings.sc_client_secret)
+    sc_client = connect_to_sc(sc_username, sc_password, sc_client_id, sc_client_secret)
 
     # get list of source tracks
-    src_tracks = get_track_list(sc_client, settings.src_user_url)
+    src_tracks = get_track_list(sc_client, src_user_url)
     
     # get list of my tracks
-    my_tracks = get_track_list(sc_client, settings.my_user_url)
+    my_tracks = get_track_list(sc_client, my_user_url)
     
     # find new tracks
     new_tracks = find_new_tracks(src_tracks, my_tracks)
@@ -208,7 +208,7 @@ def main():
     
     # process all new tracks
     for track in new_tracks:
-        process_track(osc_client, osc_server, sc_client, track.uri, settings.download_folder, settings.track_suffix)
+        process_track(osc_client, osc_server, sc_client, track.uri, download_folder, track_suffix)
         sleep(3) # well done, have a little break for a few seconds
         
     # close OSC server
