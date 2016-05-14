@@ -44,14 +44,33 @@ def get_track_list(sc_client, user_url, limit=1000):
 
 
         
-#%% make all given tracks downloadable or not (UTIL FUNCTION, not used in main process)
+#%% UTIL FUNCTIONS, not used in main process 
+# make all given tracks downloadable or not        
 def make_tracks_downloadable(sc_client, tracks, downloadable = 1):
     for track in tracks:
         print "Setting track '" + track.title + "' downloadable to " + str(downloadable)
         sc_client.put(track.uri, track={'downloadable':downloadable})
         
-    
-    
+        
+        
+# update description for all my tracks from src_tracks
+def update_track_descriptions(sc_client, my_tracks, src_tracks):
+    # probably a more python way of doing this, but whatever
+    for my_track in my_tracks: # iterate everything in my list
+        print "Looking for track source: " + my_track.title, 
+        found = False
+        for src_track in src_tracks: # iterate everything in src list
+            if(src_track.title == my_track.title): # compare names
+                found = True
+                descr = generate_track_description(src_track)
+                print "...FOUND. Updating description"
+                sc_client.put(my_track.uri, track={'description': descr})
+                break
+        if not found: # how come there's a track in my list that isn't in src?
+            print "...NOT FOUND IN SOURCE: " + my_track.permalink_url
+        
+        
+        
 #%% find new tracks (by title) which are in src_tracks list but not in my_tracks list
 # TODO: more 'python' way of doing it at:
 # http://stackoverflow.com/questions/37191908/how-to-find-objects-which-are-in-a-list-but-not-in-another-list-comparing-by-p
@@ -139,6 +158,17 @@ def wait_for_osc_ping(osc_server):
         sleep(1)
 
 
+        
+#%% generate track description by getting relevant data from src       
+def generate_track_description(src_track):
+    d = u'Jam on ' + src_track.permalink_url
+    d += u'\n-------\n'
+    if src_track.description:
+        d += src_track.description
+    return d
+
+    
+
 #%% process track
 # provide unique track url 
 def process_track(osc_client, osc_server, sc_client, track_uri, download_folder, track_suffix):
@@ -148,9 +178,9 @@ def process_track(osc_client, osc_server, sc_client, track_uri, download_folder,
         osc_server.handle_request()
      
     # download track
-    track, track_path = download_track_from_sc(sc_client, track_uri, download_folder)
+    src_track, track_path = download_track_from_sc(sc_client, track_uri, download_folder)
     
-    if track.downloadable:
+    if src_track.downloadable:
         send_track_to_maxmsp(osc_client, track_path)
         
         # Wait till OSC ping comes indicating track is finished
@@ -160,8 +190,8 @@ def process_track(osc_client, osc_server, sc_client, track_uri, download_folder,
             
             
         # post to sound cloud with same name and description as original
-        title = track.title
-        description = track.description
+        title = src_track.title
+        description = generate_track_description(src_track)
         new_track_path = track_path + track_suffix    
         print "Starting upload for track " + new_track_path
         post_track_to_sc(sc_client, new_track_path, title, description)
