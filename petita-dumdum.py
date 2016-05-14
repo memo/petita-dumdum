@@ -74,11 +74,14 @@ def find_new_tracks(src_tracks, my_tracks):
 # provide unique track url 
 def download_track_from_sc(sc_client, track_uri, download_folder):
     track = sc_client.get('/resolve', url=track_uri)
+    print "Downloading track '" + track.title + "' from " + track.download_url + " to " + download_folder
+    download_path = ''
     if(track.downloadable):
         src_url = track.download_url + '?client_id=' + sc_client_id
         download_path = download_folder + track.title + ".mp3"
-        print "Downloading track " + track.title + " from " + track.download_url + " to " + download_path
         urllib.urlretrieve(src_url, download_path)
+    else:
+        print "ERROR: Track is not downloadable"
     return track, download_path
 
 
@@ -147,21 +150,22 @@ def process_track(osc_client, osc_server, sc_client, track_uri, download_folder,
     # download track
     track, track_path = download_track_from_sc(sc_client, track_uri, download_folder)
     
-    send_track_to_maxmsp(osc_client, track_path)
-    
-    # Wait till OSC ping comes indicating track is finished
-    wait_for_osc_ping(osc_server)
-
-    sleep(3) # well done, have a little break for a few seconds
+    if track.downloadable:
+        send_track_to_maxmsp(osc_client, track_path)
         
-        
-    # post to sound cloud with same name and description as original
-    title = track.title
-    description = track.description
-    new_track_path = track_path + track_suffix    
-    print "Starting upload for track " + new_track_path
-    post_track_to_sc(sc_client, new_track_path, title, description)
+        # Wait till OSC ping comes indicating track is finished
+        wait_for_osc_ping(osc_server)
     
+        sleep(3) # well done, have a little break for a few seconds
+            
+            
+        # post to sound cloud with same name and description as original
+        title = track.title
+        description = track.description
+        new_track_path = track_path + track_suffix    
+        print "Starting upload for track " + new_track_path
+        post_track_to_sc(sc_client, new_track_path, title, description)
+        
     
     
 #%% for osc server timeout    
