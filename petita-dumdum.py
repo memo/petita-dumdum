@@ -37,7 +37,7 @@ def connect_to_sc(sc_username, sc_password, sc_client_id, sc_client_secret):
 #%% get any user's track list (by user URL, e.g. https://soundcloud.com/petita-dumdum )
 def get_track_list(sc_client, user_url, limit=1000):
     user = sc_client.get('/resolve', url = user_url)
-    print "Getting track list for user " + user.username
+    print "Getting track list for user " + user.username + "...", 
     tracks = sc_client.get("/tracks", user_id = user.id, limit = limit)
     print str(len(tracks)) + " tracks"
     return tracks
@@ -93,7 +93,7 @@ def find_new_tracks(src_tracks, my_tracks):
 # provide unique track url 
 def download_track_from_sc(sc_client, track_uri, download_folder):
     track = sc_client.get('/resolve', url=track_uri)
-    print "Downloading track '" + track.title + "' from " + track.download_url + " to " + download_folder
+    print "Downloading track '" + track.title + " to " + download_folder
     download_path = ''
     if(track.downloadable):
         src_url = track.download_url + '?client_id=' + sc_client_id
@@ -207,16 +207,17 @@ def handle_timeout(self):
 #%% main
 def main():
     # initialize OSC sender   
+    print "Initializing OSC Sender"
     osc_client = OSC.OSCClient()
     osc_client.connect((osc_target_ip, osc_target_port))
     
-    # initialize OSC receiver
+    # initialize OSC Server (receiver)
+    print "Initializing OSC Server (receiver)"
     osc_server = OSC.OSCServer((osc_target_ip, osc_listen_port))
     osc_server.addMsgHandler( "/finished", osc_callback_maxmsp_finished )
     osc_server.timeout = 0
     osc_server.handle_timeout = types.MethodType(handle_timeout, osc_server)
     
-
     # launch maxmsp patch
     print "Starting MaxMSP with " + maxmsp_patch_path
     os.startfile(maxmsp_patch_path) 
@@ -246,6 +247,7 @@ def main():
         sleep(3) # well done, have a little break for a few seconds
         
     # close OSC server
+    print "Closing OSC Server"
     osc_server.close()
 
 
